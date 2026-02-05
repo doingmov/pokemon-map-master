@@ -100,6 +100,7 @@ def show_pokemon(request, pokemon_id):
         'attack': entities.first().attack if entities.exists() else None,
         'defense': entities.first().defense if entities.exists() else None,
         'stamina': entities.first().stamina if entities.exists() else None,
+        'description': pokemon.description
     }
 
     return render(request, 'pokemon.html', context={
