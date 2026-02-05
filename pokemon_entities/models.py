@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 class Pokemon(models.Model):
 	title = models.CharField(max_length=200)
@@ -20,6 +21,8 @@ class PokemonEntity(models.Model):
 		)
 	lat = models.FloatField()
 	lon = models.FloatField()
+	appeared_at = models.DateTimeField(default=timezone.now)
+	disappeared_at = models.DateTimeField(default=timezone.now)
 
 	def __str__(self):
 		return f"{self.pokemon.title} at ({self.lat}, {self.lon})"
