@@ -24,6 +24,14 @@ class Pokemon(models.Model):
         blank=True,
         null=True,
     )
+    previous_evolution = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='next_evolutions'
+    )
+
 
     def __str__(self):
         return self.title

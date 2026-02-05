@@ -60,12 +60,6 @@ def show_all_pokemons(request):
     })
 
 
-
-from django.utils.timezone import localtime, now
-from django.http import HttpResponseNotFound
-from django.shortcuts import render
-from .models import Pokemon, PokemonEntity
-
 def show_pokemon(request, pokemon_id):
     try:
         pokemon = Pokemon.objects.get(id=pokemon_id)
@@ -78,17 +72,10 @@ def show_pokemon(request, pokemon_id):
         disappeared_at__gte=now_time
     )
 
-    folium_map = folium.Map(location=[55.751244, 37.618423], zoom_start=12)
+    folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
 
     for entity in entities:
-        if entity.pokemon.image:
-            img_url = request.build_absolute_uri(entity.pokemon.image.url)
-        else:
-            img_url = (
-                'https://vignette.wikia.nocookie.net/pokemon/images/6/6e/%21.png/revision'
-                '/latest/fixed-aspect-ratio-down/width/240/height/240?cb=20130525215832'
-                '&fill=transparent'
-            )
+        img_url = request.build_absolute_uri(entity.pokemon.image.url) if entity.pokemon.image else DEFAULT_IMAGE_URL
         add_pokemon(folium_map, entity.lat, entity.lon, img_url)
 
     pokemon_data = {
@@ -104,6 +91,23 @@ def show_pokemon(request, pokemon_id):
         'stamina': entities.first().stamina if entities.exists() else None,
         'description': pokemon.description
     }
+
+    if pokemon.previous_evolution:
+        pokemon_data['previous_evolution'] = {
+            'pokemon_id': pokemon.previous_evolution.id,
+            'title_ru': pokemon.previous_evolution.title,
+            'img_url': request.build_absolute_uri(pokemon.previous_evolution.image.url) if pokemon.previous_evolution.image else None,
+        }
+
+    next_evos = pokemon.next_evolutions.all()
+    if next_evos.exists():
+        pokemon_data['next_evolutions'] = []
+        for evo in next_evos:
+            pokemon_data['next_evolutions'].append({
+                'pokemon_id': evo.id,
+                'title_ru': evo.title,
+                'img_url': request.build_absolute_uri(evo.image.url) if evo.image else None,
+            })
 
     return render(request, 'pokemon.html', context={
         'map': folium_map._repr_html_(),
