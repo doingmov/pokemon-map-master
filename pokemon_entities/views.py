@@ -99,15 +99,17 @@ def show_pokemon(request, pokemon_id):
             'img_url': request.build_absolute_uri(pokemon.previous_evolution.image.url) if pokemon.previous_evolution.image else None,
         }
 
-    next_evos = pokemon.next_evolutions.all()
-    if next_evos.exists():
-        pokemon_data['next_evolutions'] = []
-        for evo in next_evos:
-            pokemon_data['next_evolutions'].append({
-                'pokemon_id': evo.id,
-                'title_ru': evo.title,
-                'img_url': request.build_absolute_uri(evo.image.url) if evo.image else None,
-            })
+    next_evolution = None
+    next_evolutions = pokemon.next_evolutions.all()
+    if next_evolutions:
+        evo = next_evolutions.first()
+        next_evolution = {
+            'pokemon_id': evo.id,
+            'title_ru': evo.title,
+            'img_url': request.build_absolute_uri(evo.image.url) if evo.image else None,
+        }
+    pokemon_data['next_evolution'] = next_evolution
+
 
     return render(request, 'pokemon.html', context={
         'map': folium_map._repr_html_(),
